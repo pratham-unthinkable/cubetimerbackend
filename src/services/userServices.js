@@ -65,7 +65,7 @@ const deleteLogs = async (logs = []) => {
 
 const getStats = async ({ _id }) => {
   const stats = await Log.aggregate([
-    { $match: { user: mongoose.Types.ObjectId(_id) } },
+    { $match: { user: new mongoose.Types.ObjectId(_id) } },
     { $sort: { createdAt: -1 } },
     {
       $group: {

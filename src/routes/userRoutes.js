@@ -29,5 +29,15 @@ export const userRoutes = {
       method: "DELETE",
       callback: userController.deleteLogs,
     },
+    {
+      name: "logs",
+      method: "DELETE",
+      callback: userController.deleteLogs,
+    },
+    {
+      name: "stats",
+      method: "GET",
+      callback: userController.getStats,
+    },
   ],
 };

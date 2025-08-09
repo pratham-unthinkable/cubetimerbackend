@@ -3,6 +3,7 @@ import { User } from "../models/user.js";
 import { sign } from "../utils/jwt.js";
 import { Log } from "../models/log.js";
 import { paginate } from "../utils/paginate.js";
+import mongoose from "mongoose";
 
 const login = async ({ username, password }) => {
   const user = await User.findOne({ username });
@@ -62,10 +63,38 @@ const deleteLogs = async (logs = []) => {
   return res;
 };
 
+const getStats = async ({ _id }) => {
+  const stats = await Log.aggregate([
+    { $match: { user: mongoose.Types.ObjectId(_id) } },
+    { $sort: { createdAt: -1 } },
+    {
+      $group: {
+        _id: null,
+        totalCount: { $sum: 1 },
+        totalSum: { $sum: "$time" },
+        allLogs: { $push: "$$ROOT" }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        totalCount: 1,
+        totalSum: 1,
+        last5: { $slice: ["$allLogs", 5] },
+        last12: { $slice: ["$allLogs", 12] }
+      }
+    }
+  ]);
+
+  return stats[0] || { totalCount: 0, totalSum: 0, last5: [], last12: [] };
+};
+
+
 export default {
   login,
   register,
   addLogs,
   getLogs,
   deleteLogs,
+  getStats
 };

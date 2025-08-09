@@ -21,7 +21,7 @@ const addLogs = async (req, res) => {
   if (!logs) {
     throw { status: 404, message: "no logs found" };
   }
-  return userServices.syncLogs(
+  return userServices.addLogs(
     logs.map((log) => ({ ...log, user: req.user._id }))
   );
 };
@@ -39,10 +39,17 @@ const deleteLogs = async (req, res) => {
   return userServices.deleteLogs(logs);
 };
 
+const getStats = async (req, res) => {
+  const { user } = req;
+  if (!user) throw { message: "user not founc", status: 404 };
+  return userServices.getStats(user);
+};
+
 export default {
   register,
   login,
   addLogs,
   getLogs,
-  deleteLogs
+  deleteLogs,
+  getStats
 };

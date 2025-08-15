@@ -72,7 +72,9 @@ const getStats = async ({ _id }) => {
         _id: null,
         totalCount: { $sum: 1 },
         totalSum: { $sum: "$time" },
-        allLogs: { $push: "$$ROOT" }
+        allLogs: { $push: "$$ROOT" },
+        best: { $min: "$time" },
+        worst: { $max: "$time" }
       }
     },
     {
@@ -80,15 +82,34 @@ const getStats = async ({ _id }) => {
         _id: 0,
         totalCount: 1,
         totalSum: 1,
+        best: 1,
+        worst: 1,
         last5: { $slice: ["$allLogs", 5] },
         last12: { $slice: ["$allLogs", 12] }
+      }
+    },
+    {
+      $addFields: {
+        avg5: {
+          $cond: [
+            { $gte: [{ $size: "$last5" }, 5] },
+            { $avg: "$last5.time" },
+            null
+          ]
+        },
+        avg12: {
+          $cond: [
+            { $gte: [{ $size: "$last12" }, 12] },
+            { $avg: "$last12.time" },
+            null
+          ]
+        }
       }
     }
   ]);
 
-  return stats[0] || { totalCount: 0, totalSum: 0, last5: [], last12: [] };
+  return stats[0] || {};
 };
-
 
 export default {
   login,
